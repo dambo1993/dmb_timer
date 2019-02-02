@@ -5,7 +5,8 @@
  *      Author: Przemek
  */
 
-#include "dmb_timer.h"
+#include "../../../DMB_TIMER/dmb_timer/dmb_timer/dmb_timer.h"
+
 #include <inttypes.h>
 #include <libs_config/dmb_timer_settings.h>
 
@@ -205,7 +206,7 @@ void dmb_timer_reset_ticks()
 /*
  * Dodanie taska do timera. Funkcja zwraca jego id.
  */
-int8_t dmb_timer_add_task( uint16_t interval, dmb_timer_type type, dmb_timer_callback callback )
+int8_t dmb_timer_add_task( uint16_t interval, dmb_timer_type_e type, dmb_timer_callback callback )
 {
 	int8_t timer_number = -1;
 

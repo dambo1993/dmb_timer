@@ -16,17 +16,17 @@
 typedef void (*dmb_timer_callback)(uint8_t);
 
 //! enum okreslajacy typ timera/taska
-typedef enum dmb_timer_type
+typedef enum
 {
 	dmb_timer_type_not_initialized, // nie byl zainicjalizowany, uzywany wewnetrznie
 	dmb_timer_type_single,			// pojedyncze odpalenie callbacka za zadany okres czasu
 	dmb_timer_type_continous,		// ciagla praca co zadany okres czasu
 	dmb_timer_type_pre_delay,		// ciagla praca co zadany okres czasu z opoznieniem startowym
-}dmb_timer_type;
+}dmb_timer_type_e;
 
 
 int8_t dmb_timer_add_task_with_predelay(uint16_t predelay, uint16_t interval, dmb_timer_callback callback );
-int8_t dmb_timer_add_task(uint16_t interval, dmb_timer_type type, dmb_timer_callback callback );
+int8_t dmb_timer_add_task(uint16_t interval, dmb_timer_type_e type, dmb_timer_callback callback );
 
 void dmb_timer_continue_task(int8_t timer_number);
 void dmb_timer_disable_task(uint8_t id);
