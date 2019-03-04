@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #include <libs_config/dmb_timer_settings.h>
 
-static uint8_t _dmb_timer_actual_enabled_counter = 0; // ile timerow jest aktualnie aktywnych
+static uint8_t _dmb_timer_actual_enabled_counter = 0; // licznik ile timerow jest aktualnie aktywnych
 
 typedef enum {
 	dmb_timer_state_off,		// wylaczony timer
@@ -66,7 +66,7 @@ void dmb_timer_init( uint8_t interval )
 /*
  * Funkcja "tykajaca" - zapewnic jej cykliczne wywolywanie. Zapala ona tylko flage do funkcji sprawdzenia eventow.
  */
-void dmb_timer_tick()
+void dmb_timer_tick(void)
 {
 	_dmb_timer_tick_counter++;
 }
@@ -74,7 +74,7 @@ void dmb_timer_tick()
 /*
  * Funkcja sprawdzajaca eventy - do umieszczenia w petli glownej aplikacji.
  */
-void dmb_timer_events()
+void dmb_timer_events(void)
 {
 	// tutaj mozemy dac "if" lub "while" - jaka jest roznica pomiedzy nimi
 	// jesli jakas funkcja zajmie za duzo czasu - wtedy w przypadku "if-a" czasy nam sie przesuna
@@ -172,7 +172,7 @@ void dmb_timer_pause_task(int8_t timer_number)
 }
 
 /*
- * Kontynuowanie okreslonego timera/taska. Musimy potem wybrac
+ * Kontynuowanie okreslonego timera/taska.
  */
 void dmb_timer_continue_task(int8_t timer_number)
 {
