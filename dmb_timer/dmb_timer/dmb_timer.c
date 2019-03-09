@@ -52,6 +52,8 @@ static uint8_t timers_to_off_counter = 0;
  */
 static uint8_t _dmb_timer_tick_interval;
 
+//! Funkcja wykonywana, gdy czas wykonywania zadan przekracza interwal czasu.
+static dmb_timer_execution_time_problem_callback _dmb_timer_execution_time_callback = 0;
 
 /*
  * Inicjalizacja biblioteki
@@ -64,11 +66,38 @@ void dmb_timer_init( uint8_t interval )
 }
 
 /*
+ * Rejestracja funkcji wykonywanej gdy czas wykonywania zadan przekracza interwal czasu.
+ *
+ * @param funkcja do wywolania
+ */
+void dmb_timer_register_execution_time_problem(dmb_timer_execution_time_problem_callback ptr)
+{
+	_dmb_timer_execution_time_callback = ptr;
+}
+
+/*
  * Funkcja "tykajaca" - zapewnic jej cykliczne wywolywanie. Zapala ona tylko flage do funkcji sprawdzenia eventow.
  */
 void dmb_timer_tick(void)
 {
 	_dmb_timer_tick_counter++;
+}
+
+
+/*
+ * Sprawdzenie, czy wykonanie zadan wyrobilo sie w zadanym interwale.
+ */
+static void dmb_timer_check_execution_time_problem(void)
+{
+	// jesli zmienna na tym etapie jest juz ustawiona
+	// oznacza to, ze nasze zadania nie wyrobily sie w czasie - mozemy to wykryc i zareagowac
+	if(_dmb_timer_tick_counter)
+	{
+		if(_dmb_timer_execution_time_callback)
+		{
+			_dmb_timer_execution_time_callback();
+		}
+	}
 }
 
 /*
@@ -160,6 +189,8 @@ void dmb_timer_events(void)
 			}
 			_dmb_timers_to_add_counter = 0;
 		}
+
+		dmb_timer_check_execution_time_problem();
 	}
 }
 

@@ -15,6 +15,9 @@
 //! jako parametr przyjmowany jest id aktualnego timera
 typedef void (*dmb_timer_callback)(uint8_t);
 
+//! typ callbacka wywolywanego podczas przekroczenia czasu wykonywania
+typedef void (*dmb_timer_execution_time_problem_callback)(void);
+
 //! enum okreslajacy typ timera/taska
 typedef enum
 {
@@ -30,6 +33,13 @@ typedef enum
  * @param interval czas co jaki bedzie wywolywane tykniecie timera. Na jego podstawie przeliczane sa czasy dla taskow.
  */
 void dmb_timer_init(uint8_t interval );
+
+/*
+ * Rejestracja funkcji wykonywanej gdy czas wykonywania zadan przekracza interwal czasu.
+ *
+ * @param funkcja do wywolania
+ */
+void dmb_timer_register_execution_time_problem(dmb_timer_execution_time_problem_callback ptr);
 
 /*
  * Funkcja sprawdzajaca eventy - do umieszczenia w petli glownej aplikacji.
