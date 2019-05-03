@@ -18,6 +18,20 @@ typedef void (*dmb_timer_callback)(uint8_t);
 //! typ callbacka wywolywanego podczas przekroczenia czasu wykonywania
 typedef void (*dmb_timer_execution_time_problem_callback)(void);
 
+//! typ callbacka wywolywanego podczas rozpoczecia wykonywania taskow
+typedef void (*dmb_timer_tasks_start_callback)(void);
+
+//! typ callbacka wywolywanego podczas zakonczenia wykonywania taskow
+typedef void (*dmb_timer_tasks_stop_callback)(void);
+
+//! callbacki zgrupowane w strukture - moga posluzyc do mierzenia czasu wykonywania
+//! lub mozna zwyczajnie migac tam diodka wizualizujac obciazenie "systemu"
+typedef struct dmb_timer_measure_callbacks
+{
+	dmb_timer_tasks_start_callback start;
+	dmb_timer_tasks_stop_callback stop;
+}dmb_timer_measure_callbacks;
+
 //! enum okreslajacy typ timera/taska
 typedef enum
 {
@@ -40,6 +54,13 @@ void dmb_timer_init(uint8_t interval );
  * @param funkcja do wywolania
  */
 void dmb_timer_register_execution_time_problem(dmb_timer_execution_time_problem_callback ptr);
+
+/*
+ * Rejestracja funkcji uruchamianych przy starcie i stopie maszyny taskow.
+ *
+ * @param struktura z callbackami
+ */
+void dmb_timer_register_measure_callbacks(dmb_timer_measure_callbacks *ptr);
 
 /*
  * Funkcja sprawdzajaca eventy - do umieszczenia w petli glownej aplikacji.

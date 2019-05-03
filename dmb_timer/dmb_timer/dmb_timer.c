@@ -5,7 +5,7 @@
  *      Author: Przemek
  */
 
-#include "../../../DMB_TIMER/dmb_timer/dmb_timer/dmb_timer.h"
+#include "dmb_timer.h"
 
 #include <inttypes.h>
 #include <libs_config/dmb_timer_settings.h>
@@ -47,6 +47,9 @@ static _dmb_timer_task tasks_array[DMB_TIMER_TASKS_NUMBER];
 //! licznik timerow do wylaczenia
 static uint8_t timers_to_off_counter = 0;
 
+//! callbacki wywolywane przy uruchamianiu taskow:
+static dmb_timer_measure_callbacks *_dmb_timer_measure_callbacks;
+
 /*
  * Okreslenie w ms co ile wystepuje Tick timera.
  */
@@ -76,6 +79,16 @@ void dmb_timer_register_execution_time_problem(dmb_timer_execution_time_problem_
 }
 
 /*
+ * Rejestracja funkcji uruchamianych przy starcie i stopie maszyny taskow.
+ *
+ * @param struktura z callbackami
+ */
+void dmb_timer_register_measure_callbacks(dmb_timer_measure_callbacks *ptr)
+{
+	_dmb_timer_measure_callbacks = ptr;
+}
+
+/*
  * Funkcja "tykajaca" - zapewnic jej cykliczne wywolywanie. Zapala ona tylko flage do funkcji sprawdzenia eventow.
  */
 void dmb_timer_tick(void)
@@ -100,6 +113,28 @@ static void dmb_timer_check_execution_time_problem(void)
 	}
 }
 
+static void _dmb_timer_start_callback_run(void)
+{
+	if(_dmb_timer_measure_callbacks != NULL)
+	{
+		if(_dmb_timer_measure_callbacks->start != NULL)
+		{
+			_dmb_timer_measure_callbacks->start;
+		}
+	}
+}
+
+static void _dmb_timer_stop_callback_run(void)
+{
+	if(_dmb_timer_measure_callbacks != NULL)
+	{
+		if(_dmb_timer_measure_callbacks->stop != NULL)
+		{
+			_dmb_timer_measure_callbacks->stop;
+		}
+	}
+}
+
 /*
  * Funkcja sprawdzajaca eventy - do umieszczenia w petli glownej aplikacji.
  */
@@ -112,6 +147,8 @@ void dmb_timer_events(void)
 	while( _dmb_timer_tick_counter )
 	{
 		_dmb_timer_tick_counter--; // -- -> bo jest to uniwersalne rozwiazanie dla while i ifa
+
+		_dmb_timer_stop_callback_run();
 
 		uint8_t sprawdzone_timery = 0;
 
@@ -192,6 +229,8 @@ void dmb_timer_events(void)
 
 		dmb_timer_check_execution_time_problem();
 	}
+
+	_dmb_timer_stop_callback_run();
 }
 
 /*
