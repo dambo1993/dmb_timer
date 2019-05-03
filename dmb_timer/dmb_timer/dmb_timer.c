@@ -7,7 +7,8 @@
 
 #include "dmb_timer.h"
 
-#include <inttypes.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <libs_config/dmb_timer_settings.h>
 
 static uint8_t _dmb_timer_actual_enabled_counter = 0; // licznik ile timerow jest aktualnie aktywnych
@@ -119,7 +120,7 @@ static void _dmb_timer_start_callback_run(void)
 	{
 		if(_dmb_timer_measure_callbacks->start != NULL)
 		{
-			_dmb_timer_measure_callbacks->start;
+			_dmb_timer_measure_callbacks->start();
 		}
 	}
 }
@@ -130,7 +131,7 @@ static void _dmb_timer_stop_callback_run(void)
 	{
 		if(_dmb_timer_measure_callbacks->stop != NULL)
 		{
-			_dmb_timer_measure_callbacks->stop;
+			_dmb_timer_measure_callbacks->stop();
 		}
 	}
 }
@@ -148,7 +149,7 @@ void dmb_timer_events(void)
 	{
 		_dmb_timer_tick_counter--; // -- -> bo jest to uniwersalne rozwiazanie dla while i ifa
 
-		_dmb_timer_stop_callback_run();
+		_dmb_timer_start_callback_run();
 
 		uint8_t sprawdzone_timery = 0;
 
