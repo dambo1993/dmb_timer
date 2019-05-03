@@ -228,9 +228,8 @@ void dmb_timer_events(void)
 		}
 
 		dmb_timer_check_execution_time_problem();
+		_dmb_timer_stop_callback_run();
 	}
-
-	_dmb_timer_stop_callback_run();
 }
 
 /*
