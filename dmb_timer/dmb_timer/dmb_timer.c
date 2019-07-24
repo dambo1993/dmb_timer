@@ -11,7 +11,8 @@
 #include <stddef.h>
 #include <libs_config/dmb_timer_settings.h>
 
-static uint8_t _dmb_timer_actual_enabled_counter = 0; // licznik ile timerow jest aktualnie aktywnych
+//! licznik ile timerow jest aktualnie aktywnych
+static uint8_t _dmb_timer_actual_enabled_counter = 0;
 
 typedef enum {
 	dmb_timer_state_off,		// wylaczony timer
@@ -103,7 +104,7 @@ void dmb_timer_tick(void)
  */
 static void dmb_timer_check_execution_time_problem(void)
 {
-	// jesli zmienna na tym etapie jest juz ustawiona
+	// jesli licznik na tym etapie jest ponownie zwiekszony
 	// oznacza to, ze nasze zadania nie wyrobily sie w czasie - mozemy to wykryc i zareagowac
 	if(_dmb_timer_tick_counter)
 	{
@@ -134,6 +135,25 @@ static void _dmb_timer_stop_callback_run(void)
 			_dmb_timer_measure_callbacks->stop();
 		}
 	}
+}
+
+/*
+ * Zwraca index w tablicy, ktory moze zostac wykorzystany do nowego zadania.
+ */
+static int8_t _dmb_timer_get_free_slot_number(void)
+{
+	int8_t index = -1;
+
+	for(uint8_t i = 0; i < DMB_TIMER_TASKS_NUMBER; i++ )
+	{
+		if( tasks_array[i].state == dmb_timer_state_off )
+		{
+			index = i;
+			break;
+		}
+	}
+
+	return index;
 }
 
 /*
@@ -268,7 +288,7 @@ void dmb_timer_disable_task(uint8_t id)
  * Kasowanie aktualnie zliczonych tikow - mozna je wykonac przed petla glowna gdzie jest sprawdzany event.
  * Wtedy zaczynamy odmierzanie czasu w tym samym momencie.
  */
-void dmb_timer_reset_ticks()
+void dmb_timer_reset_ticks(void)
 {
 	_dmb_timer_tick_counter = 0;
 }
@@ -280,22 +300,17 @@ int8_t dmb_timer_add_task( uint16_t interval, dmb_timer_type_e type, dmb_timer_c
 {
 	int8_t timer_number = -1;
 
-	// poszukiwanie wolnego timera w tablicy
-	for( uint8_t i = 0; i < DMB_TIMER_TASKS_NUMBER; i++ )
+	timer_number = _dmb_timer_get_free_slot_number();
+
+	if(timer_number != -1)
 	{
-		if( tasks_array[i].state == dmb_timer_state_off )
-		{
-			tasks_array[i].state = dmb_timer_state_to_add;
-			tasks_array[i].callback = callback;
-			tasks_array[i].type = type;
-			tasks_array[i].counter = 0;
-			tasks_array[i].interval = interval / _dmb_timer_tick_interval;
+		tasks_array[i].state = dmb_timer_state_to_add;
+		tasks_array[i].callback = callback;
+		tasks_array[i].type = type;
+		tasks_array[i].counter = 0;
+		tasks_array[i].interval = interval / _dmb_timer_tick_interval;
 
-			_dmb_timers_to_add_counter++;
-			timer_number = i;
-
-			break;
-		}
+		_dmb_timers_to_add_counter++;
 	}
 
 	return timer_number;
@@ -305,27 +320,22 @@ int8_t dmb_timer_add_task( uint16_t interval, dmb_timer_type_e type, dmb_timer_c
  * Dodanie taska cyklicznego do timera z opoznieniem startowym. Zakladam, ze jest to zawsze timer continous.
  * Dla singla wystarczy zawsze tylko dodac delay.
  */
-int8_t dmb_timer_add_task_with_predelay( uint16_t predelay, uint16_t interval, dmb_timer_callback callback )
+int8_t dmb_timer_add_task_with_predelay(uint16_t predelay, uint16_t interval, dmb_timer_callback callback)
 {
 	int8_t timer_number = -1;
 
-	// poszukiwanie wolnego timera w tablicy
-	for( uint8_t i = 0; i < DMB_TIMER_TASKS_NUMBER; i++ )
+	timer_number = _dmb_timer_get_free_slot_number();
+
+	if(timer_number != -1)
 	{
-		if( tasks_array[i].state == dmb_timer_state_off )
-		{
-			tasks_array[i].state = dmb_timer_state_to_add;
-			tasks_array[i].callback = callback;
-			tasks_array[i].type = dmb_timer_type_pre_delay;
-			tasks_array[i].counter = 0;
-			tasks_array[i].pre_counter = predelay / _dmb_timer_tick_interval;
-			tasks_array[i].interval = interval / _dmb_timer_tick_interval;
+		tasks_array[timer_number].state = dmb_timer_state_to_add;
+		tasks_array[timer_number].callback = callback;
+		tasks_array[timer_number].type = dmb_timer_type_pre_delay;
+		tasks_array[timer_number].counter = 0;
+		tasks_array[timer_number].pre_counter = predelay / _dmb_timer_tick_interval;
+		tasks_array[timer_number].interval = interval / _dmb_timer_tick_interval;
 
-			_dmb_timers_to_add_counter++;
-			timer_number = i;
-
-			break;
-		}
+		_dmb_timers_to_add_counter++;
 	}
 
 	return timer_number;
