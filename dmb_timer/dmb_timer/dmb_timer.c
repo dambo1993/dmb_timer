@@ -304,11 +304,7 @@ int8_t dmb_timer_add_task( uint16_t interval, dmb_timer_type_e type, dmb_timer_c
 
 	if(timer_number != -1)
 	{
-		tasks_array[i].state = dmb_timer_state_to_add;
-		tasks_array[i].callback = callback;
-		tasks_array[i].type = type;
-		tasks_array[i].counter = 0;
-		tasks_array[i].interval = interval / _dmb_timer_tick_interval;
+		tasks_array[timer_number].interval = interval / _dmb_timer_tick_interval;
 
 		_dmb_timers_to_add_counter++;
 	}
